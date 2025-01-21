@@ -4,7 +4,7 @@ const puppeteer = require('puppeteer-extra');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;  
 
 const resultadosSuscripciones = [];
-var passwordDefault = "-*17654$k{)(^&3";
+var passwordDefault = "-*17654$k{)(^&p";
 const delay = (time) => {
     return new Promise(function(resolve) {
         setTimeout(resolve, time);
@@ -140,7 +140,6 @@ async function processAccount(account) {
             });
 
             if (botonSignIn) {
-                console.log("Campos detectados, haciendo click en el botón de inicio de sesión");
                 await botonSignIn.click();
             } else {
                 console.log("Los campos no están completos");
@@ -167,10 +166,6 @@ async function processAccount(account) {
             console.log(styles);
             return styles.display !== 'none' && styles.visibility !== 'hidden' && parseFloat(styles.opacity) > 0;
         });
-    
-        console.log("¿El elemento es visible?", isVisible);
-    
-
         
     // Detectar redirección automática
     try {
@@ -181,10 +176,9 @@ async function processAccount(account) {
         if (redirectResult === 'timeout') {
             console.log('Password incorrect - La redirección excedió el tiempo límite de 60000ms');
         } else {
-            console.log('Se detectó redirección automática a:', page.url());
+            console.log('INICIO DE SESSION EXITOSO! Se detectó redirección automática a:', page.url());
             await page.goto('https://auth.max.com/subscription');
         }
-
 
         // Verificar existencia del elemento en el DOM
         await delay(15000)
@@ -207,7 +201,6 @@ async function processAccount(account) {
                 suscripcion: elementoSuscripcion
             });
         } else {
-            console.log('No se encontró el título de suscripción');
             resultadosSuscripciones.push({
                 email: account.email,
                 suscripcion: 'Sin suscripción'
@@ -225,7 +218,6 @@ async function processAccount(account) {
         );
 
         if (!updatePasswordHost) throw new Error('No se encontró el elemento gi-update-password');
-        console.log('Acceso al primer nivel (gi-update-password) exitoso.');
 
         const updatePasswordShadow = await page.evaluateHandle(el => el.shadowRoot, updatePasswordHost);
 
@@ -235,7 +227,6 @@ async function processAccount(account) {
         );
 
         if (!trackAnalyticsHost1) throw new Error('No se encontró el elemento gi-track-analytics-events en el segundo nivel');
-        console.log('Acceso al segundo nivel (gi-track-analytics-events) exitoso.');
 
         const trackAnalyticsShadow1 = await trackAnalyticsHost1.evaluateHandle(el => el.shadowRoot);
 
@@ -245,7 +236,6 @@ async function processAccount(account) {
         );
 
         if (!trackAnalyticsHost2) throw new Error('No se encontró el elemento gi-track-analytics-events en el tercer nivel');
-        console.log('Acceso al tercer nivel (gi-track-analytics-events) exitoso.');
 
     try {
     // Verificamos el primer shadow root
@@ -288,8 +278,6 @@ async function processAccount(account) {
             estructura: shadowRoot.innerHTML
         };
     });
-
-    console.log('Resultado de la búsqueda:', resultado);
 
     } catch (error) {
         console.error('Error al buscar el elemento:', error);
